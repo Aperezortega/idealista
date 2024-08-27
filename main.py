@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+BASE_URL = 'https://www.idealista.com'
 
 def fetch_page_content(url):
     headers = {
@@ -101,19 +102,52 @@ def scrape_idealista():
         
         for ad in ads:
             title = ad.find('a', class_='item-link')
+            href = BASE_URL + ad.find('a', class_='item-link')['href']
             price = ad.find('span', class_='item-price')
-            location = ad.find('span', class_='item-location')
-
+            
             # Verificar si los elementos existen antes de obtener el texto
             title_text = title.get_text(strip=True) if title else "N/A"
             price_text = price.get_text(strip=True) if price else "N/A"
-            location_text = location.get_text(strip=True) if location else "N/A"
-
+            details = fetch_ad_details(href)
+            
             print(f"Anuncio {count + 1}:")
-            ## print(f"Título: {title_text}")
-            ## print(f"Precio: {price_text}")
-            ## print(f"Ubicación: {location_text}\n")
-
+            print(f"Título: {title_text}")
+            print(f"Enlace: {href}")
+            print(f"Precio: {price_text}")
+            print(f"Imagen: {details['img_url']}")
+            print(f"Características: {details['features']}")
+            print(f"Ubicación: {details['location']}")
             count += 1
+            
+def fetch_ad_details(url):
+    # Convertir la URL relativa en una URL absoluta
+    
+    # Obtener el contenido de la página del anuncio
+    page_content = fetch_page_content(url)
+    if not page_content:
+        return None
+
+    soup = BeautifulSoup(page_content, 'html.parser')
+    
+    # Extraer la URL de la imagen
+    picture = soup.find('picture')
+    img_url = picture.find('img')['src'] if picture and picture.find('img') else "N/A"
+    
+    # Extraer las características
+    features = soup.find('div', class_='details-property-feature-one')
+    features_list = [li.get_text(strip=True) for li in features.find_all('li')] if features else []
+    features_text = " | ".join(features_list) if features_list else "N/A"
+    
+    # Extraer la ubicación
+    header_map = soup.find('div', id='headerMap')
+    location_list = [li.get_text(strip=True) for li in header_map.find_all('li')] if header_map else []
+    location_text = " | ".join(location_list) if location_list else "N/A"
+    
+    return {
+        'img_url': img_url,
+        'features': features_text,
+        'location': location_text
+    }
+    
 # Ejecutar la función
 scrape_idealista()
