@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.exc import NoResultFound
 from database import engine, Base, SessionLocal
 from models import Ad
 
@@ -114,7 +115,14 @@ def scrape_idealista():
 
             try:
                 existing_ad = session.query(Ad).filter_by(href=href).one()
-                print(f"El anuncio con href {href} ya existe en la base de datos.")
+                print(f"El anuncio con href {href} ya existe en la base de datos. Actualizando...")
+                # Actualizar el registro existente
+                existing_ad.title = title_text
+                existing_ad.price = price_text
+                existing_ad.img_url = img_url
+                existing_ad.features = features_text
+                existing_ad.location = location_text
+                session.commit()
             except NoResultFound:
                 ad_record = Ad(
                     title=title_text,
