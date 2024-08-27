@@ -6,7 +6,7 @@ from models import Ad
 
 BASE_URL = 'https://www.idealista.com'
 
-# Crear las tablas en la base de datos
+
 Base.metadata.create_all(bind=engine)
 
 def fetch_page_content(url):
@@ -19,15 +19,15 @@ def fetch_page_content(url):
         'Referer': 'https://www.google.com/'
     }
     
-    # Usar una sesión de requests
+ 
     session = requests.Session()
     session.headers.update(headers)
     
-    # Realizar la solicitud HTTP a la URL
+ 
     print(f"Realizando solicitud HTTP a la URL: {url}")
     response = session.get(url)
     
-    # Verificar si la solicitud fue exitosa
+
     if response.status_code != 200:
         print(f"Error: No se pudo obtener la página. Código de estado: {response.status_code}")
         return None
@@ -36,23 +36,17 @@ def fetch_page_content(url):
     return response.content
 
 def fetch_ad_details(url):
-    # Obtener el contenido de la página del anuncio
     page_content = fetch_page_content(url)
     if not page_content:
         return None
 
     soup = BeautifulSoup(page_content, 'html.parser')
     
-    # Extraer la URL de la imagen
     picture = soup.find('picture')
     img_url = picture.find('img')['src'] if picture and picture.find('img') else "N/A"
-    
-    # Extraer las características
     features = soup.find('div', class_='details-property-feature-one')
     features_list = [li.get_text(strip=True) for li in features.find_all('li')] if features else []
     features_text = " | ".join(features_list) if features_list else "N/A"
-    
-    # Extraer la ubicación
     header_map = soup.find('div', id='headerMap')
     location_list = [li.get_text(strip=True) for li in header_map.find_all('li')] if header_map else []
     location_text = " | ".join(location_list) if location_list else "N/A"
@@ -63,13 +57,12 @@ def fetch_ad_details(url):
         'location': location_text
     }
 
-# Bucle principal para procesar los anuncios
 def scrape_idealista():
     base_url = 'https://www.idealista.com/venta-viviendas/malaga-malaga/con-precio-hasta_100000,precio-desde_80000'
     query_params = '?ordenado-por=fecha-publicacion-desc'
     
     count = 0
-    max_pages = 5  # Define el número máximo de páginas a scrapear
+    max_pages = 5
 
     session = SessionLocal()
 
@@ -79,20 +72,16 @@ def scrape_idealista():
         else:
             url = f"{base_url}/pagina-{page}.htm{query_params}"
 
-        # Obtener el contenido de la página actual
+      
         page_content = fetch_page_content(url)
         if not page_content:
             continue
         
-        # Parsear el contenido HTML
         print(f"Parseando el contenido HTML de la página {page}...")
         soup = BeautifulSoup(page_content, 'html.parser')
         
-        # Buscar los anuncios
         print("Buscando anuncios...")
         ads = soup.find_all('div', class_='item-info-container')
-        
-        # Verificar si se encontraron anuncios
         if not ads:
             print(f"No se encontraron anuncios en la página {page}.")
             continue
@@ -102,12 +91,9 @@ def scrape_idealista():
             title = ad.find('a', class_='item-link')
             href = BASE_URL + ad.find('a', class_='item-link')['href']
             price = ad.find('span', class_='item-price')
-            
-            # Verificar si los elementos existen antes de obtener el texto
             title_text = title.get_text(strip=True) if title else "N/A"
             price_text = price.get_text(strip=True) if price else "N/A"
 
-            # Obtener información adicional del anuncio
             ad_details = fetch_ad_details(href)
             if ad_details:
                 img_url = ad_details['img_url']
@@ -126,12 +112,10 @@ def scrape_idealista():
             print(f"Características: {features_text}")
             print(f"Ubicación: {location_text}\n")
 
-            # Verificar si el href ya existe en la base de datos
             try:
                 existing_ad = session.query(Ad).filter_by(href=href).one()
                 print(f"El anuncio con href {href} ya existe en la base de datos.")
             except NoResultFound:
-                # Si no existe, insertar el nuevo anuncio
                 ad_record = Ad(
                     title=title_text,
                     href=href,
@@ -147,5 +131,4 @@ def scrape_idealista():
 
     session.close()
 
-# Ejecutar la función
 scrape_idealista()
