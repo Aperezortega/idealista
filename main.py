@@ -6,8 +6,6 @@ from database import engine, Base, SessionLocal
 from models import Ad
 
 BASE_URL = 'https://www.idealista.com'
-
-
 Base.metadata.create_all(bind=engine)
 
 def fetch_page_content(url):
@@ -57,11 +55,10 @@ def fetch_ad_details(url):
         'features': features_text,
         'location': location_text
     }
-
-def scrape_idealista():
-    base_url = 'https://www.idealista.com/venta-viviendas/malaga-malaga/con-precio-hasta_100000,precio-desde_80000'
-    query_params = '?ordenado-por=fecha-publicacion-desc'
-    
+def scrap_idealista(url):
+    parts = url.split('?')
+    base_url = parts[0]
+    query_params = '?' + parts[1] if len(parts) > 1 else ''
     count = 0
     max_pages = 5
 
@@ -139,4 +136,6 @@ def scrape_idealista():
 
     session.close()
 
-scrape_idealista()
+if __name__ == '__main__':
+    url = ""
+    scrap_idealista(url)
