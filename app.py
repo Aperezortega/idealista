@@ -1,17 +1,21 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from main import scrap_idealista
 
 app = Flask(__name__)
 
-@app.route('/scrap', methods=['GET'])
+@app.route('/')
+def index():
+    return send_from_directory('.', 'index.html')
+
+@app.route('/scrap', methods=['POST'])
 def scrap():
-    url = request.args.get('url')
+    url = request.json.get('url')
     if not url:
         return jsonify({"error": "URL is required"}), 400
     
     try:
-        scrap_idealista(url)
-        return jsonify({"message": "Scraping completed successfully"}), 200
+        scraped_data = scrap_idealista(url)
+        return jsonify(scraped_data), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

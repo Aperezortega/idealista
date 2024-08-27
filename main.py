@@ -60,10 +60,11 @@ def scrap_idealista(url):
     base_url = parts[0]
     query_params = '?' + parts[1] if len(parts) > 1 else ''
     count = 0
-    max_pages = 5
+    max_pages = 1
+    max_ads = 5
 
     session = SessionLocal()
-
+    scraped_data = []
     for page in range(1, max_pages + 1):
         if page == 1:
             url = f"{base_url}{query_params}"
@@ -109,7 +110,15 @@ def scrap_idealista(url):
             print(f"URL de la imagen: {img_url}")
             print(f"Características: {features_text}")
             print(f"Ubicación: {location_text}\n")
-
+            scraped_data.append({
+                "title": title_text,
+                "href": href,
+                "price": price_text,
+                "img_url": img_url,
+                "features": features_text,
+                "location": location_text
+            })
+            """
             try:
                 existing_ad = session.query(Ad).filter_by(href=href).one()
                 print(f"El anuncio con href {href} ya existe en la base de datos. Actualizando...")
@@ -131,10 +140,13 @@ def scrap_idealista(url):
                 )
                 session.add(ad_record)
                 session.commit()
-
+            """
             count += 1
-
+            if count >= max_ads:
+                break
+            
     session.close()
+    return scraped_data
 
 if __name__ == '__main__':
     url = ""
