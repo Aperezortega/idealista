@@ -1,6 +1,13 @@
 import requests
 from bs4 import BeautifulSoup
+from sqlalchemy.orm import Session
+from database import engine, Base, SessionLocal
+from models import Ad
+
 BASE_URL = 'https://www.idealista.com'
+
+# Crear las tablas en la base de datos
+Base.metadata.create_all(bind=engine)
 
 def fetch_page_content(url):
     headers = {
@@ -28,59 +35,50 @@ def fetch_page_content(url):
     
     return response.content
 
-def get_max_pages(soup):
-    # Buscar el contenedor de paginación
-    pagination = soup.find('div', class_='pagination')
-    if not pagination:
-        print("No se encontró el contenedor de paginación.")
-        return 1  # Si no se encuentra el contenedor de paginación, asumir que solo hay una página
-    
-    # Buscar todos los elementos 'li' dentro del contenedor de paginación
-    pages = pagination.find_all('li')
-    if not pages:
-        print("No se encontraron elementos de página.")
-        return 1  # Si no se encuentran elementos de página, asumir que solo hay una página
-    
-    # Extraer los números de página de los enlaces
-    page_numbers = []
-    for page in pages:
-        link = page.find('a')
-        if link and link.get_text().isdigit():
-            page_numbers.append(int(link.get_text()))
-    
-    if not page_numbers:
-        print("No se encontraron números de página.")
-        return 1  # Si no se encuentran números de página, asumir que solo hay una página
-    
-    max_page = max(page_numbers)
-    print(f"Número máximo de páginas encontrado: {max_page}")
-    return max_page
+def fetch_ad_details(url):
+    # Obtener el contenido de la página del anuncio
+    page_content = fetch_page_content(url)
+    if not page_content:
+        return None
 
+    soup = BeautifulSoup(page_content, 'html.parser')
+    
+    # Extraer la URL de la imagen
+    picture = soup.find('picture')
+    img_url = picture.find('img')['src'] if picture and picture.find('img') else "N/A"
+    
+    # Extraer las características
+    features = soup.find('div', class_='details-property-feature-one')
+    features_list = [li.get_text(strip=True) for li in features.find_all('li')] if features else []
+    features_text = " | ".join(features_list) if features_list else "N/A"
+    
+    # Extraer la ubicación
+    header_map = soup.find('div', id='headerMap')
+    location_list = [li.get_text(strip=True) for li in header_map.find_all('li')] if header_map else []
+    location_text = " | ".join(location_list) if location_list else "N/A"
+    
+    return {
+        'img_url': img_url,
+        'features': features_text,
+        'location': location_text
+    }
+
+# Bucle principal para procesar los anuncios
 def scrape_idealista():
     base_url = 'https://www.idealista.com/venta-viviendas/malaga-malaga/con-precio-hasta_100000,precio-desde_80000'
     query_params = '?ordenado-por=fecha-publicacion-desc'
-    url = f"{base_url}{query_params}"
-    # Obtener el contenido de la primera página
-    page_content = fetch_page_content(url)
-    if not page_content:
-        return
-    
-    # Parsear el contenido HTML de la primera página
-    print("Parseando el contenido HTML de la primera página...")
-    soup = BeautifulSoup(page_content, 'html.parser')
-    
-    # Obtener el número máximo de páginas
-    max_pages = get_max_pages(soup)
-    print(f"Número máximo de páginas: {max_pages}")
     
     count = 0
+    max_pages = 5  # Define el número máximo de páginas a scrapear
+
+    session = SessionLocal()
 
     for page in range(1, max_pages + 1):
         if page == 1:
             url = f"{base_url}{query_params}"
         else:
             url = f"{base_url}/pagina-{page}.htm{query_params}"
-        
+
         # Obtener el contenido de la página actual
         page_content = fetch_page_content(url)
         if not page_content:
@@ -108,46 +106,46 @@ def scrape_idealista():
             # Verificar si los elementos existen antes de obtener el texto
             title_text = title.get_text(strip=True) if title else "N/A"
             price_text = price.get_text(strip=True) if price else "N/A"
-            details = fetch_ad_details(href)
-            
+
+            # Obtener información adicional del anuncio
+            ad_details = fetch_ad_details(href)
+            if ad_details:
+                img_url = ad_details['img_url']
+                features_text = ad_details['features']
+                location_text = ad_details['location']
+            else:
+                img_url = "N/A"
+                features_text = "N/A"
+                location_text = "N/A"
+
             print(f"Anuncio {count + 1}:")
             print(f"Título: {title_text}")
             print(f"Enlace: {href}")
             print(f"Precio: {price_text}")
-            print(f"Imagen: {details['img_url']}")
-            print(f"Características: {details['features']}")
-            print(f"Ubicación: {details['location']}")
-            count += 1
-            
-def fetch_ad_details(url):
-    # Convertir la URL relativa en una URL absoluta
-    
-    # Obtener el contenido de la página del anuncio
-    page_content = fetch_page_content(url)
-    if not page_content:
-        return None
+            print(f"URL de la imagen: {img_url}")
+            print(f"Características: {features_text}")
+            print(f"Ubicación: {location_text}\n")
 
-    soup = BeautifulSoup(page_content, 'html.parser')
-    
-    # Extraer la URL de la imagen
-    picture = soup.find('picture')
-    img_url = picture.find('img')['src'] if picture and picture.find('img') else "N/A"
-    
-    # Extraer las características
-    features = soup.find('div', class_='details-property-feature-one')
-    features_list = [li.get_text(strip=True) for li in features.find_all('li')] if features else []
-    features_text = " | ".join(features_list) if features_list else "N/A"
-    
-    # Extraer la ubicación
-    header_map = soup.find('div', id='headerMap')
-    location_list = [li.get_text(strip=True) for li in header_map.find_all('li')] if header_map else []
-    location_text = " | ".join(location_list) if location_list else "N/A"
-    
-    return {
-        'img_url': img_url,
-        'features': features_text,
-        'location': location_text
-    }
-    
+            # Verificar si el href ya existe en la base de datos
+            try:
+                existing_ad = session.query(Ad).filter_by(href=href).one()
+                print(f"El anuncio con href {href} ya existe en la base de datos.")
+            except NoResultFound:
+                # Si no existe, insertar el nuevo anuncio
+                ad_record = Ad(
+                    title=title_text,
+                    href=href,
+                    price=price_text,
+                    img_url=img_url,
+                    features=features_text,
+                    location=location_text
+                )
+                session.add(ad_record)
+                session.commit()
+
+            count += 1
+
+    session.close()
+
 # Ejecutar la función
 scrape_idealista()
