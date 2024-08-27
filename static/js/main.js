@@ -10,7 +10,7 @@ $(document).ready(function() {
 
         const url = $('#url').val();
         console.log('URL:', url);
-
+        $('#loader').show();
         $.ajax({
             url: '/scrap',
             type: 'POST',
@@ -20,10 +20,14 @@ $(document).ready(function() {
                 console.log('Response:', response);
                 $('#response').html('<div class="alert alert-success">Scraping successful!</div>');
                 populateTable(response);
+                $('#tableContainer').removeClass('d-none'); // Mostrar la tabla
             },
             error: function(error) {
                 console.log('Error:', error);
                 $('#response').html('<div class="alert alert-danger">Error: ' + error.responseJSON.error + '</div>');
+            },
+            complete: function() {
+                $('#loader').hide();
             }
         });
     });
@@ -33,10 +37,9 @@ $(document).ready(function() {
         table.clear();
         data.forEach(item => {
             table.row.add([
-                item.title,
-                `<a href="${item.href}" target="_blank">${item.href}</a>`,
+                `<img src="${item.img_url}" alt="Image" style="max-width: 100%; height: auto; display: block;">`,
+                `<a href="${item.href}" target="_blank">${item.title}</a>`,
                 item.price,
-                item.img_url,
                 item.features,
                 item.location
             ]).draw();
