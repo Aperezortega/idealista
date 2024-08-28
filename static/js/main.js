@@ -18,7 +18,7 @@ $(document).ready(function() {
             data: JSON.stringify({ url: url }),
             success: function(response) {
                 console.log('Response:', response);
-                $('#response').html('<div class="alert alert-success">Scraping successful!</div>');
+                $('#response').html('<div class="alert alert-success text-center">Scraping successful!</div>');
                 populateTable(response);
                 $('#tableContainer').removeClass('d-none'); // Mostrar la tabla
             },
