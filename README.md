@@ -36,9 +36,9 @@ This is a simple Python program that scrapes real estate listings from the Ideal
 ### Installation
 
 1. **Clone the repository**:
-   git clone https://github.com/yourusername/idealista-scraper.git
-   cd idealista-scraper
-   pip install -r requirements.txt
+   - git clone https://github.com/Aperezortega/idealista.git
+   - cd idealista
+   - pip install -r requirements.txt
 
 ### Code Structure
 
