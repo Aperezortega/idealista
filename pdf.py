@@ -28,12 +28,8 @@ def extract_information(text):
 
     return extracted_data
 
-def extract_information_from_pdf(pdf_path):
+if __name__ == '__main__':
+    pdf_path = 'nota.pdf'
     text = extract_text_from_pdf(pdf_path)
     extracted_data = extract_information(text)
-    return json.dumps(extracted_data, ensure_ascii=False, indent=4)
-
-# Ejemplo de uso
-pdf_path = 'nota.pdf'
-json_data = extract_information_from_pdf(pdf_path)
-print(json_data)
+    print(json.dumps(extracted_data, indent=4))

@@ -59,8 +59,8 @@ def scrap_idealista(url):
     base_url = parts[0]
     query_params = '?' + parts[1] if len(parts) > 1 else ''
     count = 0
-    max_pages = 30
-    max_ads = 100
+    max_pages = 1
+    max_ads = 10
 
     session = SessionLocal()
     scraped_data = []
