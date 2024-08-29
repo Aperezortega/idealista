@@ -45,4 +45,16 @@ $(document).ready(function() {
             ]).draw();
         });
     }
+
+    $('#printTable').on('click', function() {
+        var printContents = $('#scrapedData').clone().prop('outerHTML');
+        var printWindow = window.open('', '', 'height=600,width=800');
+        printWindow.document.write('<html><head><title>Print Table</title>');
+        printWindow.document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write(printContents);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.print();
+    });
 });
