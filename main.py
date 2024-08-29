@@ -7,7 +7,6 @@ from models import Ad
 
 BASE_URL = 'https://www.idealista.com'
 Base.metadata.create_all(bind=engine)
-
 def fetch_page_content(url):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
@@ -60,8 +59,8 @@ def scrap_idealista(url):
     base_url = parts[0]
     query_params = '?' + parts[1] if len(parts) > 1 else ''
     count = 0
-    max_pages = 1
-    max_ads = 5
+    max_pages = 30
+    max_ads = 100
 
     session = SessionLocal()
     scraped_data = []
@@ -118,7 +117,7 @@ def scrap_idealista(url):
                 "features": features_text,
                 "location": location_text
             })
-            """
+            
             try:
                 existing_ad = session.query(Ad).filter_by(href=href).one()
                 print(f"El anuncio con href {href} ya existe en la base de datos. Actualizando...")
@@ -140,7 +139,7 @@ def scrap_idealista(url):
                 )
                 session.add(ad_record)
                 session.commit()
-            """
+            
             count += 1
             if count >= max_ads:
                 break
