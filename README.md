@@ -1,4 +1,8 @@
-# Idealista Scraper
+[![English](https://img.shields.io/badge/language-English-blue)](#ENGLISH) 
+[![Español](https://img.shields.io/badge/idioma-Español-red)](#ESPAÑOL)
+___
+
+# ENGLISH
 
 ## Overview
 
@@ -67,3 +71,75 @@ ___
 ### Disclaimer 
 This tool is intended for educational purposes only. Please respect the terms of service of Idealista and avoid overloading their servers with too many requests.
 
+___
+
+# ESPAÑOL
+
+## Descripción General
+
+Este es un programa simple en Python que extrae listados de bienes raíces del sitio web Idealista, la plataforma líder de anuncios inmobiliarios en España. Aunque Idealista ofrece un servicio API de pago, esta herramienta proporciona una alternativa gratuita para extraer datos similares.
+
+## Características
+
+- **Funcionalidad de Scraping**: Extrae información como título, precio, URL de la imagen, características y ubicación de los listados de Idealista.
+- **API de Flask**: Proporciona un endpoint para realizar operaciones de scraping a través de solicitudes HTTP.
+- **Integración con Base de Datos**: (Comentado en esta versión) Opción para guardar o actualizar los datos extraídos en una base de datos usando SQLAlchemy.
+- **Carga y Extracción de PDF**: Permite a los usuarios cargar una "nota simple" en formato PDF para extraer las características de la propiedad y buscar automáticamente listados similares en Idealista.
+
+## Cómo Funciona
+
+### Proceso de Scraping
+
+1. **Solicitud de URL**: El scraper toma una URL de Idealista y envía una solicitud HTTP usando un user-agent personalizado para imitar un navegador real.
+2. **Análisis HTML**: El contenido HTML recibido se analiza usando BeautifulSoup para extraer detalles relevantes de los listados.
+3. **Extracción de Datos**: El scraper recopila datos como el título, precio, URL de la imagen, características y ubicación de cada anuncio.
+4. **Respuesta de la API**: Los datos extraídos se devuelven como una respuesta JSON.
+
+### Carga y Extracción de PDF
+
+1. **Carga de PDF**: Los usuarios pueden cargar un archivo PDF de "nota simple" a través del endpoint `/upload`.
+2. **Extracción de Texto**: El PDF cargado se procesa para extraer el contenido de texto.
+3. **Extracción de Datos**: Se extraen características relevantes de la propiedad, como el municipio y el área construida, del texto.
+4. **Búsqueda en Idealista**: Las características extraídas se utilizan para construir una URL de búsqueda para Idealista, y se extraen listados similares que se devuelven como una respuesta JSON.
+
+### API de Flask
+
+- **Endpoint**: `/scrap`
+- **Método**: `POST`
+- **Entrada**: Objeto JSON con una clave `url`, que debe contener la URL de búsqueda de Idealista.
+- **Salida**: Objeto JSON con los datos extraídos o un mensaje de error si el scraping falla.
+- **Endpoint de Carga de PDF**: `/upload`
+  - **Método**: `POST`
+  - **Entrada**: Datos de formulario con una clave `pdfFile`, que debe contener el archivo PDF de "nota simple".
+  - **Salida**: Objeto JSON con las características de la propiedad extraídas y listados similares de Idealista.
+
+## Instrucciones de Configuración
+
+### Requisitos Previos
+
+- Python 3.x
+- Bibliotecas de Python requeridas: Flask, BeautifulSoup4, requests, SQLAlchemy (si se utiliza la funcionalidad de base de datos)
+
+### Instalación
+
+1. **Clonar el repositorio**:
+   - git clone https://github.com/Aperezortega/idealista.git
+   - cd idealista
+   - pip install -r requirements.txt
+
+### Estructura del Código
+
+- **app.py**: El archivo principal de la aplicación Flask, contiene el endpoint de la API.
+- **main.py**: Contiene la lógica principal de scraping usando BeautifulSoup.
+- **database.py**: Configura el motor y la sesión de SQLAlchemy.
+- **models.py**: Define los modelos de base de datos para almacenar anuncios.
+- **index.html**: URL raíz.
+
+### Personalización:
+
+- **Máximo de Páginas/Anuncios**: Variables para limitar el número de anuncios/páginas a extraer.
+- **Integración con Base de Datos**: Para la demostración, el código de inserción en la base de datos está comentado, descomentar para habilitar el almacenamiento en la base de datos.
+
+___
+### Disclaimer
+Esta herramienta está destinada únicamente para fines educativos. Por favor, respete los términos de servicio de Idealista y evite sobrecargar sus servidores con demasiadas solicitudes.
