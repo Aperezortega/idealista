@@ -52,7 +52,7 @@ This is a simple Python program that scrapes real estate listings from the Ideal
 
 - **Max Pages/Ads**: Variables to limit the number of ads/pages to scrape
 - **Database Integration**: for the demo,  the database insertion code is commented, uncomment to enable database storage
-__
+___
 ### Disclaimer 
 This tool is intended for educational purposes only. Please respect the terms of service of Idealista and avoid overloading their servers with too many requests.
 
