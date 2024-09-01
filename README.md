@@ -9,6 +9,7 @@ This is a simple Python program that scrapes real estate listings from the Ideal
 - **Scraping Functionality**: Extracts information such as title, price, image URL, features, and location from the Idealista listings.
 - **Flask API**: Provides an endpoint to perform scraping operations via HTTP requests.
 - **Database Integration**: (Commented out in this version) Option to save or update scraped data in a database using SQLAlchemy.
+- **PDF Upload and Extraction**: Allows users to upload a "nota simple" in PDF format to extract property characteristics and automatically search for similar listings on Idealista.
 
 ## How It Works
 
@@ -19,13 +20,23 @@ This is a simple Python program that scrapes real estate listings from the Ideal
 3. **Data Extraction**: The scraper collects data such as the title, price, image URL, features, and location of each ad.
 4. **API Response**: The scraped data is returned as a JSON response.
 
+### PDF Upload and Extraction
+
+1. **PDF Upload**: Users can upload a "nota simple" PDF file via the `/upload` endpoint.
+2. **Text Extraction**: The uploaded PDF is processed to extract text content.
+3. **Data Extraction**: Relevant property characteristics such as municipality and built area are extracted from the text.
+4. **Idealista Search**: The extracted characteristics are used to construct a search URL for Idealista, and similar listings are scraped and returned as a JSON response.
+
 ### Flask API
 
 - **Endpoint**: `/scrap`
 - **Method**: `POST`
 - **Input**: JSON object with a `url` key, which should contain the Idealista search URL.
 - **Output**: JSON object with the scraped data or an error message if the scraping fails.
-
+- **PDF Upload Endpoint**: `/upload`
+  - **Method**: `POST`
+  - **Input**: Form data with a `pdfFile` key, which should contain the "nota simple" PDF file.
+  - **Output**: JSON object with the extracted property characteristics and similar listings from Idealista.
 ## Setup Instructions
 
 ### Prerequisites

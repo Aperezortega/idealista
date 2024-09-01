@@ -5,7 +5,6 @@ import os
 
 app = Flask(__name__)
 
-# Configuración de la carpeta de carga
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -42,18 +41,18 @@ def upload():
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
             file.save(file_path)
             
-            # Ejecutar las funciones de pdf.py
+            
             text = extract_text_from_pdf(file_path)
             extracted_data = extract_information(text)
             print("Información extraída del PDF:")
             for key, value in extracted_data.items():
                 print(f"{key}: {value}")
             
-            # Extraer el municipio y la superficie construida del diccionario
+            
             municipio = extracted_data.get('municipio', 'No encontrado')
             superficie_construida = extracted_data.get('superficie_construida', '0')
             
-            # Convertir superficie construida a entero y redondear al múltiplo de 20 más cercano
+           
             try:
                 superficie_construida = superficie_construida.replace(' m2', '')
                 if ',' in superficie_construida:
@@ -61,10 +60,10 @@ def upload():
                 else:
                     superficie_construida = float(superficie_construida)
                 
-                # Redondear al entero más cercano
+               
                 superficie_construida = round(superficie_construida)
                 
-                # Redondear al múltiplo de 20 más cercano
+                
                 superficie_construida = round(superficie_construida / 20) * 20
                 superficie_min = max(0, superficie_construida - 20)
                 superficie_max = superficie_construida + 20
