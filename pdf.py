@@ -10,7 +10,7 @@ def extract_text_from_pdf(pdf_path):
     return text
 
 def extract_information(text):
-    # Definir patrones de regex para extraer la información necesaria
+
     patterns = {
         'municipio': r'Municipio:\s*(.*?)\s*Finca',
         'calle': r'Vía Publica:\s*(.*)',
